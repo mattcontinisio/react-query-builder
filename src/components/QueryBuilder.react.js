@@ -6,7 +6,7 @@ var Condition = require('./Condition.react');
 
 
 /**
- *	QueryBuilder react component
+ *  QueryBuilder react component
  */
 var QueryBuilder = React.createClass({
     propTypes: {
@@ -23,30 +23,30 @@ var QueryBuilder = React.createClass({
         };
     },
 
-	getInitialState: function() {
+    getInitialState: function() {
         var queryFreezerStore = new Freezer(this.props.initialQuery);
         console.log(queryFreezerStore.get());
-		return {
+        return {
             queryFreezerStore: queryFreezerStore,
             queryStore: queryFreezerStore.get()
         };
-	},
+    },
 
     componentDidMount: function() {
-		console.log('QueryBuilder componentDidMount');
+        console.log('QueryBuilder componentDidMount');
 
         // Update state every time query changes
-		var queryStoreListener = this.state.queryStore.getListener();
+        var queryStoreListener = this.state.queryStore.getListener();
         queryStoreListener.on('update', function(updated) {
-      		console.log('queryStore update');
-			console.log(updated);
-			this.setState({
+            console.log('queryStore update');
+            console.log(updated);
+            this.setState({
                 queryStore: updated
             });
-		}.bind(this));
-	},
+        }.bind(this));
+    },
 
-	render: function() {
+    render: function() {
         var childView = null;
         if (this.state.queryStore.type === 'ConditionGroup') {
             childView = <ConditionGroup query={this.state.queryStore} parent={null} index={0} />;
@@ -59,16 +59,16 @@ var QueryBuilder = React.createClass({
             return null;
         }
 
-		return (
-			<div className="queryBuilder">
+        return (
+            <div className="queryBuilder">
                 {childView}
-			</div>
-		);
-	},
+            </div>
+        );
+    },
 
-	componentWillUnmount: function() {
-		console.log('QueryBuilder componentWillUnmount');
-	}
+    componentWillUnmount: function() {
+        console.log('QueryBuilder componentWillUnmount');
+    }
 });
 
 module.exports = QueryBuilder;

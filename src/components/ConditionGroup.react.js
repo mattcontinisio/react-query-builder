@@ -18,13 +18,13 @@ var operatorOptions = operators.map(function(operator, index) {
  *  ConditionGroup react component
  */
 var ConditionGroup = React.createClass({
-	getInitialState: function() {
-		return {};
-	},
+    getInitialState: function() {
+        return {};
+    },
 
-	componentDidMount: function() {
-		console.log('ConditionGroup componentDidMount');
-	},
+    componentDidMount: function() {
+        console.log('ConditionGroup componentDidMount');
+    },
 
     onOperatorChange: function(e) {
         console.log('onOperatorChange');
@@ -54,7 +54,7 @@ var ConditionGroup = React.createClass({
         console.log('removeSelf');
     },
 
-	render: function() {
+    render: function() {
         console.log(this.props);
         var childrenViews = this.props.query.children.map(function(childQuery, index) {
             if (childQuery.type === 'ConditionGroup') {
@@ -69,8 +69,8 @@ var ConditionGroup = React.createClass({
             }
         }.bind(this));
 
-		return (
-			<div className="conditionGroup">
+        return (
+            <div className="conditionGroup">
                 <select className="operators" onChange={this.onOperatorChange}>
                     {operatorOptions}
                 </select>
@@ -80,13 +80,13 @@ var ConditionGroup = React.createClass({
                 <div className="childrenConditions">
                     {childrenViews}
                 </div>
-			</div>
-		);
-	},
+            </div>
+        );
+    },
 
-	componentWillUnmount: function() {
-		console.log('ConditionGroup componentWillUnmount');
-	}
+    componentWillUnmount: function() {
+        console.log('ConditionGroup componentWillUnmount');
+    }
 });
 
 module.exports = ConditionGroup;
