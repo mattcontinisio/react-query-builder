@@ -1,0 +1,16 @@
+# Temporary files
+*~
+
+# Log files
+*.log
+
+# Vendor
+node_modules/
+vendor/
+bower_components/
+
+# Webstorm
+.idea/
+
+# Shit
+.DS_Store
