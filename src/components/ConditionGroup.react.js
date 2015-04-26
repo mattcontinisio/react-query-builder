@@ -57,10 +57,10 @@ var ConditionGroup = React.createClass({
 	render: function() {
         console.log(this.props);
         var childrenViews = this.props.query.children.map(function(childQuery, index) {
-            if (child.type === 'ConditionGroup') {
+            if (childQuery.type === 'ConditionGroup') {
                 return <ConditionGroup query={childQuery} parent={this} index={index} key={index} />;
             }
-            else if (child.type === 'Condition') {
+            else if (childQuery.type === 'Condition') {
                 return <Condition query={childQuery} parent={this} index={index} key={index} />;
             }
             else {

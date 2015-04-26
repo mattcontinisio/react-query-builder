@@ -25,6 +25,7 @@ var QueryBuilder = React.createClass({
 
 	getInitialState: function() {
         var queryFreezerStore = new Freezer(this.props.initialQuery);
+        console.log(queryFreezerStore.get());
 		return {
             queryFreezerStore: queryFreezerStore,
             queryStore: queryFreezerStore.get()
@@ -47,10 +48,10 @@ var QueryBuilder = React.createClass({
 
 	render: function() {
         var childView = null;
-        if (this.props.query.type === 'ConditionGroup') {
+        if (this.state.queryStore.type === 'ConditionGroup') {
             childView = <ConditionGroup query={this.state.queryStore} parent={null} index={0} />;
         }
-        else if (this.props.query.type === 'Condition') {
+        else if (this.state.queryStore.type === 'Condition') {
             childView = <Condition query={this.state.queryStore} parent={null} index={0} />;
         }
         else {

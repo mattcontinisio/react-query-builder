@@ -1,7 +1,6 @@
 var React = require('react');
 
-var Query = require('../../components/Query.react');
-var ConditionGroup = require('../../components/ConditionGroup.react');
+var QueryBuilder = require('../../components/QueryBuilder.react');
 
 var query = {
     type: 'ConditionGroup',
@@ -16,4 +15,25 @@ var query = {
     ]
 };
 
-React.render(<Query query={query} />, document.getElementById('react-app'));
+var QueryBuilderApp = React.createClass({
+    componentDidMount: function() {
+		console.log('QueryBuilderApp componentDidMount');
+	},
+
+	render: function() {
+		return (
+			<div className="queryBuilderApp">
+                <h2 id="default">default</h2>
+                <QueryBuilder />
+                <h2 id="with-initial-query">with initial query</h2>
+                <QueryBuilder initialQuery={query} />
+			</div>
+		);
+	},
+
+	componentWillUnmount: function() {
+		console.log('QueryBuilderApp componentWillUnmount');
+	}
+});
+
+React.render(<QueryBuilderApp />, document.getElementById('react-app'));

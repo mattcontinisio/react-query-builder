@@ -1,8 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var React = require('react');
 
-var Query = require('../../components/Query.react');
-var ConditionGroup = require('../../components/ConditionGroup.react');
+var QueryBuilder = require('../../components/QueryBuilder.react');
 
 var query = {
     type: 'ConditionGroup',
@@ -17,10 +16,31 @@ var query = {
     ]
 };
 
-React.render(React.createElement(Query, {query: query}), document.getElementById('react-app'));
+var QueryBuilderApp = React.createClass({displayName: "QueryBuilderApp",
+    componentDidMount: function() {
+		console.log('QueryBuilderApp componentDidMount');
+	},
+
+	render: function() {
+		return (
+			React.createElement("div", {className: "queryBuilderApp"}, 
+                React.createElement("h2", {id: "default"}, "default"), 
+                React.createElement(QueryBuilder, null), 
+                React.createElement("h2", {id: "with-initial-query"}, "with initial query"), 
+                React.createElement(QueryBuilder, {initialQuery: query})
+			)
+		);
+	},
+
+	componentWillUnmount: function() {
+		console.log('QueryBuilderApp componentWillUnmount');
+	}
+});
+
+React.render(React.createElement(QueryBuilderApp, null), document.getElementById('react-app'));
 
 
-},{"../../components/ConditionGroup.react":165,"../../components/Query.react":166,"react":163}],2:[function(require,module,exports){
+},{"../../components/QueryBuilder.react":166,"react":163}],2:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -20779,17 +20799,17 @@ var Condition = React.createClass({displayName: "Condition",
 
 	onOperatorChange: function(e) {
         console.log('onOperatorChange');
-        this.props.condition.operator = e.target.value;
+        this.props.query.operator = e.target.value;
     },
 
 	onLeftOperandChange: function(e) {
         console.log('onLeftOperandChange');
-        this.props.condition.leftOperand = e.target.value;
+        this.props.query.leftOperand = e.target.value;
     },
 
 	onRightOperandChange: function(e) {
         console.log('onRightOperandChange');
-        this.props.condition.rightOperand = e.target.value;
+        this.props.query.rightOperand = e.target.value;
     },
 
 	removeSelf: function(e) {
@@ -20848,12 +20868,12 @@ var ConditionGroup = React.createClass({displayName: "ConditionGroup",
 
     onOperatorChange: function(e) {
         console.log('onOperatorChange');
-        this.props.conditionGroup.operator = e.target.value;
+        this.props.query.operator = e.target.value;
     },
 
     addCondition: function(e) {
         console.log('addCondition');
-        this.props.conditionGroup.children.push({
+        this.props.query.children.push({
             type: 'Condition',
             operator: '=',
             leftOperand: 'color',
@@ -20863,7 +20883,7 @@ var ConditionGroup = React.createClass({displayName: "ConditionGroup",
 
     addGroup: function(e) {
         console.log('addGroup');
-        this.props.conditionGroup.children.push({
+        this.props.query.children.push({
             type: 'ConditionGroup',
             operator: 'AND',
             children: []
@@ -20876,12 +20896,12 @@ var ConditionGroup = React.createClass({displayName: "ConditionGroup",
 
 	render: function() {
         console.log(this.props);
-        var childrenViews = this.props.conditionGroup.children.map(function(child, index) {
-            if (child.type === 'ConditionGroup') {
-                return React.createElement(ConditionGroup, {conditionGroup: child, parent: this, index: index, key: index});
+        var childrenViews = this.props.query.children.map(function(childQuery, index) {
+            if (childQuery.type === 'ConditionGroup') {
+                return React.createElement(ConditionGroup, {query: childQuery, parent: this, index: index, key: index});
             }
-            else if (child.type === 'Condition') {
-                return React.createElement(Condition, {condition: child, parent: this, index: index, key: index});
+            else if (childQuery.type === 'Condition') {
+                return React.createElement(Condition, {query: childQuery, parent: this, index: index, key: index});
             }
             else {
                 console.error('invalid type: type must be ConditionGroup or Condition');
@@ -20921,15 +20941,26 @@ var Condition = require('./Condition.react');
 
 
 /**
- *	Query react component
+ *	QueryBuilder react component
  */
-var Query = React.createClass({displayName: "Query",
+var QueryBuilder = React.createClass({displayName: "QueryBuilder",
     propTypes: {
-        query: React.PropTypes.object
+        initialQuery: React.PropTypes.object
+    },
+
+    getDefaultProps: function() {
+        return {
+            initialQuery: {
+                type: 'ConditionGroup',
+                operator: 'AND',
+                children: []
+            }
+        };
     },
 
 	getInitialState: function() {
-        var queryFreezerStore = new Freezer(this.props.query);
+        var queryFreezerStore = new Freezer(this.props.initialQuery);
+        console.log(queryFreezerStore.get());
 		return {
             queryFreezerStore: queryFreezerStore,
             queryStore: queryFreezerStore.get()
@@ -20937,7 +20968,7 @@ var Query = React.createClass({displayName: "Query",
 	},
 
     componentDidMount: function() {
-		console.log('Query componentDidMount');
+		console.log('QueryBuilder componentDidMount');
 
         // Update state every time query changes
 		var queryStoreListener = this.state.queryStore.getListener();
@@ -20952,11 +20983,11 @@ var Query = React.createClass({displayName: "Query",
 
 	render: function() {
         var childView = null;
-        if (this.props.query.type === 'ConditionGroup') {
-            childView = React.createElement(ConditionGroup, {conditionGroup: this.state.queryStore, parent: null, index: 0});
+        if (this.state.queryStore.type === 'ConditionGroup') {
+            childView = React.createElement(ConditionGroup, {query: this.state.queryStore, parent: null, index: 0});
         }
-        else if (this.props.query.type === 'Condition') {
-            childView = React.createElement(Condition, {condition: this.state.queryStore, parent: null, index: 0});
+        else if (this.state.queryStore.type === 'Condition') {
+            childView = React.createElement(Condition, {query: this.state.queryStore, parent: null, index: 0});
         }
         else {
             console.error('invalid type: type must be ConditionGroup or Condition');
@@ -20964,18 +20995,18 @@ var Query = React.createClass({displayName: "Query",
         }
 
 		return (
-			React.createElement("div", {className: "query"}, 
+			React.createElement("div", {className: "queryBuilder"}, 
                 childView
 			)
 		);
 	},
 
 	componentWillUnmount: function() {
-		console.log('Query componentWillUnmount');
+		console.log('QueryBuilder componentWillUnmount');
 	}
 });
 
-module.exports = Query;
+module.exports = QueryBuilder;
 
 
 },{"./Condition.react":164,"./ConditionGroup.react":165,"freezer-js":3,"react":163}]},{},[1]);
