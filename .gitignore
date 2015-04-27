@@ -9,8 +9,11 @@ node_modules/
 vendor/
 bower_components/
 
+# Build
+build/
+
 # Webstorm
 .idea/
 
-# Shit
+# Other
 .DS_Store
