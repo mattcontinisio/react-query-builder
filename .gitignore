@@ -9,6 +9,9 @@ node_modules/
 vendor/
 bower_components/
 
+# Build
+build/
+
 # Webstorm
 .idea/
 
