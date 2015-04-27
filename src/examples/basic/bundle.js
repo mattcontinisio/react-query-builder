@@ -3,7 +3,17 @@ var React = require('react');
 
 var QueryBuilder = require('../../components/QueryBuilder.react');
 
-var query = {
+var query1 = null;
+var query1String;
+
+var onQuery1Update = function(queryBuilder) {
+    query1 = queryBuilder.getQuery();
+    query1String = queryBuilder.getQueryString();
+    //console.log(query1);
+    //console.log(query1String);
+};
+
+var query2 = {
     type: 'ConditionGroup',
     operator: 'AND',
     children: [
@@ -17,24 +27,20 @@ var query = {
 };
 
 var QueryBuilderApp = React.createClass({displayName: "QueryBuilderApp",
-    componentDidMount: function() {
-		console.log('QueryBuilderApp componentDidMount');
-	},
+    render: function() {
+        var query1String = QueryBuilder.queryToString(query1);
+        console.log(query1String);
 
-	render: function() {
-		return (
-			React.createElement("div", {className: "queryBuilderApp"}, 
+        return (
+            React.createElement("div", {className: "queryBuilderApp"}, 
                 React.createElement("h2", {id: "default"}, "default"), 
-                React.createElement(QueryBuilder, null), 
+                React.createElement(QueryBuilder, {onQueryUpdate: onQuery1Update}), 
+                React.createElement("pre", null, query1String), 
                 React.createElement("h2", {id: "with-initial-query"}, "with initial query"), 
-                React.createElement(QueryBuilder, {initialQuery: query})
-			)
-		);
-	},
-
-	componentWillUnmount: function() {
-		console.log('QueryBuilderApp componentWillUnmount');
-	}
+                React.createElement(QueryBuilder, {initialQuery: query2})
+            )
+        );
+    }
 });
 
 React.render(React.createElement(QueryBuilderApp, null), document.getElementById('react-app'));
@@ -20770,15 +20776,17 @@ module.exports = require('./lib/React');
 var React = require('react');
 
 
+// Comparison operators
 var operators = [
     { value: '=',	display: '=',	className:'equal' },
     { value: '!=',	display: '!=',  className:'notEqual' },
-	{ value: '<',	display: '<',	className:'lessThan' },
-	{ value: '<=',	display: '<=',	className:'lessThanOrEqual' },
-	{ value: '>',	display: '>',	className:'greaterThan' },
-	{ value: '>=',	display: '>=',	className:'greaterThanOrEqual' }
+    { value: '<',	display: '<',	className:'lessThan' },
+    { value: '<=',	display: '<=',	className:'lessThanOrEqual' },
+    { value: '>',	display: '>',	className:'greaterThan' },
+    { value: '>=',	display: '>=',	className:'greaterThanOrEqual' }
 ];
 
+// Array of options for operator select
 var operatorOptions = operators.map(function(operator, index) {
     var classString = 'operator ' + operator.className;
     return (React.createElement("option", {className: classString, value: operator.value, key: index}, operator.display));
@@ -20786,52 +20794,45 @@ var operatorOptions = operators.map(function(operator, index) {
 
 
 /**
- *	Condition react component
+ * Condition react component
  */
 var Condition = React.createClass({displayName: "Condition",
-	getInitialState: function() {
-		return {};
-	},
-
-	componentDidMount: function() {
-		console.log('Condition componentDidMount');
-	},
-
-	onOperatorChange: function(e) {
-        console.log('onOperatorChange');
-        this.props.query.operator = e.target.value;
+    propTypes: {
+        query: React.PropTypes.object.isRequired,
+        parent: React.PropTypes.object.isRequired,
+        index: React.PropTypes.number.isRequired
     },
 
-	onLeftOperandChange: function(e) {
-        console.log('onLeftOperandChange');
-        this.props.query.leftOperand = e.target.value;
+    onOperatorChange: function(e) {
+        this.props.query.set('operator', e.target.value);
     },
 
-	onRightOperandChange: function(e) {
-        console.log('onRightOperandChange');
-        this.props.query.rightOperand = e.target.value;
+    onLeftOperandChange: function(e) {
+        this.props.query.set('leftOperand', e.target.value);
     },
 
-	removeSelf: function(e) {
-        console.log('removeSelf');
+    onRightOperandChange: function(e) {
+        this.props.query.set('rightOperand', e.target.value);
     },
 
-	render: function() {
-		return (
-			React.createElement("div", {className: "condition"}, 
-                React.createElement("input", {type: "text", className: "operand leftOperand", onChange: this.onLeftOperandChange}), 
-				React.createElement("select", {className: "operators", onChange: this.onOperatorChange}, 
+    removeSelf: function(e) {
+        if (this.props.parent) {
+            this.props.parent.children.splice(this.props.index, 1);
+        }
+    },
+
+    render: function() {
+        return (
+            React.createElement("div", {className: "query condition"}, 
+                React.createElement("input", {type: "text", className: "operand leftOperand", defaultValue: this.props.query.leftOperand, onChange: this.onLeftOperandChange}), 
+                React.createElement("select", {className: "operators", value: this.props.query.operator, onChange: this.onOperatorChange}, 
                     operatorOptions
                 ), 
-                React.createElement("input", {type: "text", className: "operand rightOperand", onChange: this.onRightOperandChange}), 
+                React.createElement("input", {type: "text", className: "operand rightOperand", value: this.props.query.rightOperand, onChange: this.onRightOperandChange}), 
                 React.createElement("button", {className: "conditionButton removeCondition", onClick: this.removeSelf}, "-")
-			)
-		);
-	},
-
-	componentWillUnmount: function() {
-		console.log('Condition componentWillUnmount');
-	}
+            )
+        );
+    }
 });
 
 module.exports = Condition;
@@ -20843,46 +20844,44 @@ var React = require('react');
 var Condition = require('./Condition.react');
 
 
+// Boolean operators
 var operators = [
-    { value: 'AND', display: 'AND', className: 'and' },
-    { value: 'OR',  display: 'OR',  className: 'or' }
+    { value: 'AND', display: 'AND', display2: 'All', className: 'and' },
+    { value: 'OR',  display: 'OR',  display2: 'Any', className: 'or' }
 ];
 
+// Array of options for operator select
 var operatorOptions = operators.map(function(operator, index) {
     var classString = 'operator ' + operator.className;
-    return (React.createElement("option", {className: classString, value: operator.value, key: index}, operator.display));
+    return React.createElement("option", {className: classString, value: operator.value, key: index}, operator.display);
 });
 
 
 /**
- *  ConditionGroup react component
+ * ConditionGroup react component
  */
 var ConditionGroup = React.createClass({displayName: "ConditionGroup",
-	getInitialState: function() {
-		return {};
-	},
-
-	componentDidMount: function() {
-		console.log('ConditionGroup componentDidMount');
-	},
+    propTypes: {
+        query: React.PropTypes.object.isRequired,
+        parent: React.PropTypes.object.isRequired,
+        index: React.PropTypes.number.isRequired
+    },
 
     onOperatorChange: function(e) {
         console.log('onOperatorChange');
-        this.props.query.operator = e.target.value;
+        this.props.query.set('operator', e.target.value);
     },
 
     addCondition: function(e) {
-        console.log('addCondition');
         this.props.query.children.push({
             type: 'Condition',
             operator: '=',
-            leftOperand: 'color',
-            rightOperand: 'blue'
+            leftOperand: '',
+            rightOperand: ''
         });
     },
 
     addGroup: function(e) {
-        console.log('addGroup');
         this.props.query.children.push({
             type: 'ConditionGroup',
             operator: 'AND',
@@ -20891,17 +20890,18 @@ var ConditionGroup = React.createClass({displayName: "ConditionGroup",
     },
 
     removeSelf: function(e) {
-        console.log('removeSelf');
+        if (this.props.parent) {
+            this.props.parent.children.splice(this.props.index, 1);
+        }
     },
 
-	render: function() {
-        console.log(this.props);
+    render: function() {
         var childrenViews = this.props.query.children.map(function(childQuery, index) {
             if (childQuery.type === 'ConditionGroup') {
-                return React.createElement(ConditionGroup, {query: childQuery, parent: this, index: index, key: index});
+                return React.createElement(ConditionGroup, {query: childQuery, parent: this.props.query, index: index, key: index});
             }
             else if (childQuery.type === 'Condition') {
-                return React.createElement(Condition, {query: childQuery, parent: this, index: index, key: index});
+                return React.createElement(Condition, {query: childQuery, parent: this.props.query, index: index, key: index});
             }
             else {
                 console.error('invalid type: type must be ConditionGroup or Condition');
@@ -20909,9 +20909,9 @@ var ConditionGroup = React.createClass({displayName: "ConditionGroup",
             }
         }.bind(this));
 
-		return (
-			React.createElement("div", {className: "conditionGroup"}, 
-                React.createElement("select", {className: "operators", onChange: this.onOperatorChange}, 
+        return (
+            React.createElement("div", {className: "query conditionGroup"}, 
+                React.createElement("select", {className: "operators", value: this.props.query.operator, onChange: this.onOperatorChange}, 
                     operatorOptions
                 ), 
                 React.createElement("button", {className: "conditionGroupButton addCondition", onClick: this.addCondition}, "+ Add Condition"), 
@@ -20920,13 +20920,9 @@ var ConditionGroup = React.createClass({displayName: "ConditionGroup",
                 React.createElement("div", {className: "childrenConditions"}, 
                     childrenViews
                 )
-			)
-		);
-	},
-
-	componentWillUnmount: function() {
-		console.log('ConditionGroup componentWillUnmount');
-	}
+            )
+        );
+    }
 });
 
 module.exports = ConditionGroup;
@@ -20940,12 +20936,51 @@ var ConditionGroup = require('./ConditionGroup.react');
 var Condition = require('./Condition.react');
 
 
+// Helper function for converting query to a string
+var queryToString = function queryToString(query) {
+    if (!query) {
+        return '';
+    }
+
+    var i, length;
+    var result;
+
+    if (query.type === 'ConditionGroup') {
+        result = '(';
+
+        for (i = 0, length = query.children.length; i < length; ++i) {
+            result += queryToString(query.children[i]);
+
+            if (i + 1 < length) {
+                result += ' ' + query.operator + ' ';
+            }
+        }
+
+        result += ')';
+    }
+    else if (query.type === 'Condition') {
+        result = query.leftOperand + ' ' + query.operator + ' ' + query.rightOperand;
+    }
+    else {
+        console.error('invalid type: type must be ConditionGroup or Condition');
+        return '';
+    }
+
+    return result;
+};
+
+
 /**
- *	QueryBuilder react component
+ * QueryBuilder react component
  */
 var QueryBuilder = React.createClass({displayName: "QueryBuilder",
+    statics: {
+        queryToString: queryToString
+    },
+
     propTypes: {
-        initialQuery: React.PropTypes.object
+        initialQuery: React.PropTypes.object,
+        onQueryUpdate: React.PropTypes.func
     },
 
     getDefaultProps: function() {
@@ -20954,56 +20989,61 @@ var QueryBuilder = React.createClass({displayName: "QueryBuilder",
                 type: 'ConditionGroup',
                 operator: 'AND',
                 children: []
-            }
+            },
+            onQueryUpdate: function(queryBuilder) {}
         };
     },
 
-	getInitialState: function() {
+    getInitialState: function() {
         var queryFreezerStore = new Freezer(this.props.initialQuery);
-        console.log(queryFreezerStore.get());
-		return {
+        var query = queryFreezerStore.get();
+
+        return {
             queryFreezerStore: queryFreezerStore,
-            queryStore: queryFreezerStore.get()
+            query: query
         };
-	},
+    },
 
     componentDidMount: function() {
-		console.log('QueryBuilder componentDidMount');
-
         // Update state every time query changes
-		var queryStoreListener = this.state.queryStore.getListener();
-        queryStoreListener.on('update', function(updated) {
-      		console.log('queryStore update');
-			console.log(updated);
-			this.setState({
-                queryStore: updated
+        var queryListener = this.state.query.getListener();
+        queryListener.on('update', function(updated) {
+            this.setState({
+                query: updated
             });
-		}.bind(this));
-	},
 
-	render: function() {
+            this.props.onQueryUpdate(this);
+        }.bind(this));
+    },
+
+    getQuery: function() {
+        return this.state.query;
+    },
+
+    getQueryString: function() {
+        return queryToString(this.state.query);
+    },
+
+    render: function() {
+        console.log('QueryBuilder render');
         var childView = null;
-        if (this.state.queryStore.type === 'ConditionGroup') {
-            childView = React.createElement(ConditionGroup, {query: this.state.queryStore, parent: null, index: 0});
+        if (this.state.query.type === 'ConditionGroup') {
+            childView = React.createElement(ConditionGroup, {query: this.state.query, parent: null, index: 0});
         }
-        else if (this.state.queryStore.type === 'Condition') {
-            childView = React.createElement(Condition, {query: this.state.queryStore, parent: null, index: 0});
+        else if (this.state.query.type === 'Condition') {
+            childView = React.createElement(Condition, {query: this.state.query, parent: null, index: 0});
         }
         else {
             console.error('invalid type: type must be ConditionGroup or Condition');
             return null;
         }
 
-		return (
-			React.createElement("div", {className: "queryBuilder"}, 
+        return (
+            React.createElement("div", {className: "queryBuilder"}, 
                 childView
-			)
-		);
-	},
-
-	componentWillUnmount: function() {
-		console.log('QueryBuilder componentWillUnmount');
-	}
+            )
+        );
+    }
 });
 
 module.exports = QueryBuilder;
