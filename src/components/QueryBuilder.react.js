@@ -83,6 +83,8 @@ var QueryBuilder = React.createClass({
 
             this.props.onQueryUpdate(this);
         }.bind(this));
+
+        this.props.onQueryUpdate(this);
     },
 
     getQuery: function() {
@@ -94,7 +96,6 @@ var QueryBuilder = React.createClass({
     },
 
     render: function() {
-        console.log('QueryBuilder render');
         var childView = null;
         if (this.state.query.type === 'ConditionGroup') {
             childView = <ConditionGroup query={this.state.query} parent={null} index={0} />;

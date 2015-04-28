@@ -1,52 +1,61 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 var React = require('react');
 
-var QueryBuilder = require('../../components/QueryBuilder.react');
+var QueryBuilder = require('../src/components/QueryBuilder.react');
 
-var query1 = null;
-var query1String;
 
-var onQuery1Update = function(queryBuilder) {
-    query1 = queryBuilder.getQuery();
-    query1String = queryBuilder.getQueryString();
-    //console.log(query1);
-    //console.log(query1String);
-};
+var QueryBuilderDemoApp = React.createClass({displayName: "QueryBuilderDemoApp",
+    getInitialState: function() {
+        return {
+            query1: null,
+            query2: {
+                type: 'ConditionGroup',
+                operator: 'AND',
+                children: [
+                    {
+                        type: 'Condition',
+                        operator: '=',
+                        leftOperand: 'color',
+                        rightOperand: 'blue'
+                    }
+                ]
+            }
+        };
+    },
 
-var query2 = {
-    type: 'ConditionGroup',
-    operator: 'AND',
-    children: [
-        {
-            type: 'Condition',
-            operator: '=',
-            leftOperand: 'color',
-            rightOperand: 'blue'
-        }
-    ]
-};
+    onQuery1Update: function(queryBuilder) {
+        this.setState({
+            query1: queryBuilder.getQuery()
+        });
+    },
 
-var QueryBuilderApp = React.createClass({displayName: "QueryBuilderApp",
+    onQuery2Update: function(queryBuilder) {
+        this.setState({
+            query2: queryBuilder.getQuery()
+        });
+    },
+
     render: function() {
-        var query1String = QueryBuilder.queryToString(query1);
-        console.log(query1String);
+        var query1String = QueryBuilder.queryToString(this.state.query1);
+        var query2String = QueryBuilder.queryToString(this.state.query2);
 
         return (
-            React.createElement("div", {className: "queryBuilderApp"}, 
+            React.createElement("div", {className: "queryBuilderDemoApp"}, 
                 React.createElement("h2", {id: "default"}, "default"), 
-                React.createElement(QueryBuilder, {onQueryUpdate: onQuery1Update}), 
+                React.createElement(QueryBuilder, {onQueryUpdate: this.onQuery1Update}), 
                 React.createElement("pre", null, query1String), 
                 React.createElement("h2", {id: "with-initial-query"}, "with initial query"), 
-                React.createElement(QueryBuilder, {initialQuery: query2})
+                React.createElement(QueryBuilder, {initialQuery: this.state.query2, onQueryUpdate: this.onQuery2Update}), 
+                React.createElement("pre", null, query2String)
             )
         );
     }
 });
 
-React.render(React.createElement(QueryBuilderApp, null), document.getElementById('react-app'));
+React.render(React.createElement(QueryBuilderDemoApp, null), document.getElementById('react-app'));
 
 
-},{"../../components/QueryBuilder.react":166,"react":163}],2:[function(require,module,exports){
+},{"../src/components/QueryBuilder.react":166,"react":163}],2:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -20863,7 +20872,7 @@ var operatorOptions = operators.map(function(operator, index) {
 var ConditionGroup = React.createClass({displayName: "ConditionGroup",
     propTypes: {
         query: React.PropTypes.object.isRequired,
-        parent: React.PropTypes.object.isRequired,
+        parent: React.PropTypes.object,
         index: React.PropTypes.number.isRequired
     },
 
@@ -21014,6 +21023,8 @@ var QueryBuilder = React.createClass({displayName: "QueryBuilder",
 
             this.props.onQueryUpdate(this);
         }.bind(this));
+
+        this.props.onQueryUpdate(this);
     },
 
     getQuery: function() {
@@ -21025,7 +21036,6 @@ var QueryBuilder = React.createClass({displayName: "QueryBuilder",
     },
 
     render: function() {
-        console.log('QueryBuilder render');
         var childView = null;
         if (this.state.query.type === 'ConditionGroup') {
             childView = React.createElement(ConditionGroup, {query: this.state.query, parent: null, index: 0});

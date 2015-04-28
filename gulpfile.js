@@ -9,10 +9,11 @@ var source = require('vinyl-source-stream');
 gulp.task('sass', function() {
     gulp.src('./src/stylesheets/react-query-builder.scss')
         .pipe(sass())
-        .pipe(gulp.dest('./build'));
+        .pipe(gulp.dest('./src/stylesheets'))
+        .pipe(gulp.dest('./build'))
+        .pipe(gulp.dest('./demo'));
 });
 
-// Build js files with browserify
 gulp.task('js', function() {
     browserify()
         .transform(reactify)
@@ -21,6 +22,14 @@ gulp.task('js', function() {
         .pipe(source('react-query-builder.js'))
         .pipe(buffer())
         .pipe(gulp.dest('./build'));
+
+    browserify()
+        .transform(reactify)
+        .add('./demo/app.js')
+        .bundle()
+        .pipe(source('bundle.js'))
+        .pipe(buffer())
+        .pipe(gulp.dest('./demo'));
 });
 
 gulp.task('build', ['sass', 'js']);
@@ -28,6 +37,7 @@ gulp.task('build', ['sass', 'js']);
 gulp.task('watch', function() {
     gulp.watch('./src/stylesheets/*.scss', ['sass']);
     gulp.watch([
+        './demo/app.js',
         './src/components/QueryBuilder.react.js',
         './src/components/Condition.react.js',
         './src/components/ConditionGroup.react.js'
