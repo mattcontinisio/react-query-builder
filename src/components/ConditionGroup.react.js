@@ -22,7 +22,7 @@ var operatorOptions = operators.map(function(operator, index) {
 var ConditionGroup = React.createClass({
     propTypes: {
         query: React.PropTypes.object.isRequired,
-        parent: React.PropTypes.object.isRequired,
+        parent: React.PropTypes.object,
         index: React.PropTypes.number.isRequired
     },
 
