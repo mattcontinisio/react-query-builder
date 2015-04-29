@@ -1,6 +1,6 @@
 # React Query Builder
 
-Query building component for [React](https://facebook.github.io/react/) inspired by [https://github.com/kindohm/knockout-query-builder](https://github.com/kindohm/knockout-query-builder)
+Query building component for [React](https://facebook.github.io/react/)
 
 ## Install
 
@@ -59,3 +59,8 @@ Query building component for [React](https://facebook.github.io/react/) inspired
     });
 
 [Demo](http://mattcontinisio.github.io/react-query-builder/)
+
+## Inspiration
+
+* [Knockout Query Builder](http://kindohm.github.io/knockout-query-builder/)
+* [jQuery QueryBuilder](http://mistic100.github.io/jQuery-QueryBuilder/)
