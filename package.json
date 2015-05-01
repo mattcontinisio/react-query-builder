@@ -15,7 +15,7 @@
     "url": "git@bitbucket.org:mcontinisio/react-query-builder.git"
   },
   "license": "MIT",
-  "main": "index.js",
+  "main": "src/main.js",
   "dependencies": {
     "freezer-js": "^0.5.0"
   },
