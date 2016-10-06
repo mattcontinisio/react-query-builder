@@ -2,6 +2,8 @@
 
 Query building component for [React](https://facebook.github.io/react/)
 
+[Demo](http://mattcontinisio.github.io/react-query-builder/)
+
 ## Install
 
     TODO
